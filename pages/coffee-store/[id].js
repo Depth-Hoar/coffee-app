@@ -4,7 +4,6 @@ import Head from "next/head";
 import Image from "next/image";
 import cls from "classnames";
 
-import coffeeStoresData from "../../data/coffee-stores.json";
 import styles from "../../styles/coffee-store.module.css";
 import { fetchCoffeeStores } from "../../lib/coffee-stores";
 
@@ -12,11 +11,12 @@ export async function getStaticProps(staticProps) {
   const params = staticProps.params;
   console.log("params", params);
   const coffeeStores = await fetchCoffeeStores();
+  const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
+    return coffeeStore.id.toString() === params.id; //dynamic id
+  });
   return {
     props: {
-      coffeeStore: coffeeStores.find((coffeeStore) => {
-        return coffeeStore.id.toString() === params.id; //dynamic id
-      }),
+      coffeeStore: findCoffeeStoreById ? findCoffeeStoreById : {},
     },
   };
 }
