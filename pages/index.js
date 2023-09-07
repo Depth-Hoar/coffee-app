@@ -1,13 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
-
 import Banner from "../components/banner";
 import Card from "../components/card";
-
 import coffeeStoresData from "../data/coffee-stores.json";
 import { fetchCoffeeStores } from "../lib/coffee-stores";
+import { ACTION_TYPES, StoreContext } from "./_app";
 
 import useTrackLocation from "../hooks/use-track-location";
 
@@ -26,11 +25,15 @@ export async function getStaticProps(context) {
 export default function Home(props) {
   console.log("props", props);
 
-  const { handleTrackLocation, latLong, locationErrorMsg, isFindingLocation } =
+  const { handleTrackLocation, locationErrorMsg, isFindingLocation } =
     useTrackLocation();
 
-  const [coffeeStores, setCoffeeStores] = useState("");
+  // const [coffeeStores, setCoffeeStores] = useState("");
   const [coffeeStoresError, setCoffeeStoresError] = useState(null);
+
+  const { dispatch, state } = useContext(StoreContext);
+
+  const { coffeeStores, latLong } = state;
 
   console.log({ latLong, locationErrorMsg });
 
@@ -40,7 +43,13 @@ export default function Home(props) {
         try {
           const fetchedCoffeeStores = await fetchCoffeeStores(latLong, 30);
           console.log({ fetchedCoffeeStores });
-          setCoffeeStores(fetchedCoffeeStores);
+          // setCoffeeStores(fetchedCoffeeStores);
+          dispatch({
+            type: ACTION_TYPES.SET_COFFEE_STORES,
+            payload: {
+              coffeeStores: fetchedCoffeeStores,
+            },
+          });
           //set coffee stores
         } catch (error) {
           //set error
@@ -75,7 +84,8 @@ export default function Home(props) {
           <Image src="/static/hero-image.png" width={700} height={400} />
         </div>
 
-        {coffeeStores.length > 0 && (
+        {/* {coffeeStores.length > 0 && ( */}
+        {coffeeStores > 0 && (
           <div className={styles.sectionWrapper}>
             <h2 className={styles.heading2}>Stores near me</h2>
             <div className={styles.cardLayout}>
