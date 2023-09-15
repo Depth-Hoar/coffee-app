@@ -6,7 +6,7 @@ import Banner from "../components/banner";
 import Card from "../components/card";
 import coffeeStoresData from "../data/coffee-stores.json";
 import { fetchCoffeeStores } from "../lib/coffee-stores";
-import { ACTION_TYPES, StoreContext } from "./_app";
+import { ACTION_TYPES, StoreContext } from "../store/store-context";
 
 import useTrackLocation from "../hooks/use-track-location";
 
@@ -85,7 +85,7 @@ export default function Home(props) {
         </div>
 
         {/* {coffeeStores.length > 0 && ( */}
-        {coffeeStores > 0 && (
+        {coffeeStores.length > 0 && (
           <div className={styles.sectionWrapper}>
             <h2 className={styles.heading2}>Stores near me</h2>
             <div className={styles.cardLayout}>
