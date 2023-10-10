@@ -4,11 +4,12 @@ import Link from "next/link";
 import Head from "next/head";
 import Image from "next/image";
 import cls from "classnames";
+import useSWR from "swr";
 
 import styles from "../../styles/coffee-store.module.css";
 import { fetchCoffeeStores } from "../../lib/coffee-stores";
 import { StoreContext } from "../../store/store-context";
-import { isEmpty } from "../../utils";
+import { fetcher, isEmpty } from "../../utils";
 
 export async function getStaticProps(staticProps) {
   const params = staticProps.params;
@@ -94,14 +95,26 @@ const CoffeeStore = (initialProps) => {
   }, [id, initialProps.coffeeStore]);
 
   const { name, address, neighborhood, imgUrl } = coffeeStore;
-
   const [votingCount, setVotingCount] = useState(1);
+  const { data, error } = useSWR(`/api/getCoffeeStoreById?id=${id}`, fetcher);
+
+  useEffect(() => {
+    if (data && data.length > 0) {
+      console.log("data from SWR", data);
+      setCoffeeStore(data[0]);
+      setVotingCount(data[0].voting);
+    }
+  }, [data]);
 
   const handleUpvoteButton = () => {
     console.log("handle upvote");
     let count = votingCount + 1;
     setVotingCount(count);
   };
+
+  if (error) {
+    return <div>Something went wrong retrieving coffee store page</div>;
+  }
 
   return (
     <div className={styles.layout}>
