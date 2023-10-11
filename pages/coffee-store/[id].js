@@ -13,7 +13,6 @@ import { fetcher, isEmpty } from "../../utils";
 
 export async function getStaticProps(staticProps) {
   const params = staticProps.params;
-  console.log("params", params);
   const coffeeStores = await fetchCoffeeStores();
   const findCoffeeStoreById = coffeeStores.find((coffeeStore) => {
     return coffeeStore.id.toString() === params.id; //dynamic id
@@ -73,7 +72,6 @@ const CoffeeStore = (initialProps) => {
       });
 
       const dbCoffeeStore = await response.json();
-      console.log({ dbCoffeeStore });
     } catch (err) {
       console.error("Error creating coffee store", err);
     }
@@ -95,21 +93,37 @@ const CoffeeStore = (initialProps) => {
   }, [id, initialProps.coffeeStore]);
 
   const { name, address, neighborhood, imgUrl } = coffeeStore;
-  const [votingCount, setVotingCount] = useState(1);
+  const [votingCount, setVotingCount] = useState(0);
   const { data, error } = useSWR(`/api/getCoffeeStoreById?id=${id}`, fetcher);
 
   useEffect(() => {
     if (data && data.length > 0) {
-      console.log("data from SWR", data);
       setCoffeeStore(data[0]);
       setVotingCount(data[0].voting);
     }
   }, [data]);
 
-  const handleUpvoteButton = () => {
-    console.log("handle upvote");
-    let count = votingCount + 1;
-    setVotingCount(count);
+  const handleUpvoteButton = async () => {
+    try {
+      const response = await fetch("/api/favouriteCoffeeStoreById", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id,
+        }),
+      });
+
+      const dbCoffeeStore = await response.json();
+
+      if (dbCoffeeStore && dbCoffeeStore.length > 0) {
+        let count = votingCount + 1;
+        setVotingCount(count);
+      }
+    } catch (err) {
+      console.error("Error upvoting the coffee store", err);
+    }
   };
 
   if (error) {
